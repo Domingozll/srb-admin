@@ -59,10 +59,9 @@ export default {
         //调用新增
         this.saveData()
       } else {
+        //调用更新
         this.updateData()
       }
-
-      //调用更新
     },
 
     saveData() {
