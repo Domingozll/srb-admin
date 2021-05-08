@@ -76,6 +76,33 @@
           </el-tag>
         </template>
       </el-table-column>
+      <el-table-column label="操作" align="center" width="200">
+        <template slot-scope="scope">
+          <el-button
+            v-if="scope.row.status == 1"
+            type="primary"
+            size="mini"
+            @click="lock(scope.row.id, 0)"
+          >
+            锁定
+          </el-button>
+          <el-button
+            v-else
+            type="danger"
+            size="mini"
+            @click="lock(scope.row.id, 1)"
+          >
+            解锁
+          </el-button>
+          <el-button
+            type="primary"
+            size="mini"
+            @click="showLoginRecord(scope.row.id)"
+          >
+            登录日志
+          </el-button>
+        </template>
+      </el-table-column>
     </el-table>
 
     <!-- 分页组件 -->
@@ -89,11 +116,21 @@
       :total="total"
       style="padding:30px 0;"
     ></el-pagination>
+
+    <!-- 用户登录日志对话框 -->
+    <el-dialog title="用户登录日志" :visible.sync="dialogTableVisible">
+      <el-table :data="loginRecordList" border stripe>
+        <el-table-column type="index" />
+        <el-table-column prop="ip" label="IP" />
+        <el-table-column prop="createTime" label="登录时间" />
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import userInfoApi from '@/api/core/user-info'
+import userInfo from '@/api/core/user-info'
 
 export default {
   data() {
@@ -103,8 +140,8 @@ export default {
       page: 1, // 默认页码
       limit: 5, // 每页记录数
       searchObj: {}, // 查询条件
-      loginRecordList: [], //会员登录日志
-      dialogTableVisible: false //对话框是否显示
+      loginRecordList: [], // 会员登录日志
+      dialogTableVisible: false // 日志对话框是否显示
     }
   },
 
@@ -140,6 +177,21 @@ export default {
       this.searchObj = {}
       // 重新获取一次数据
       this.fetchData()
+    },
+    // 锁定或解锁会员
+    lock(id, status) {
+      userInfoApi.lock(id, status).then(response => {
+        // 刷新页面
+        this.fetchData()
+        this.$message.success(response.message)
+      })
+    },
+    // 展示前50条用户登录日志
+    showLoginRecord(id) {
+      this.dialogTableVisible = true
+      userInfoApi.getUserLoginRecordTop50(id).then(response => {
+        this.loginRecordList = response.data.list
+      })
     }
   }
 }
