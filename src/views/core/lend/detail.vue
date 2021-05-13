@@ -132,6 +132,24 @@
       </tbody>
     </table>
 
+    <h4>投资记录</h4>
+    <el-table :data="lendItemList" stripe style="width: 100%" border>
+      <el-table-column type="index" label="序号" width="70" align="center" />
+      <el-table-column prop="lendItemNo" label="投资编号" />
+      <el-table-column prop="investName" label="投资用户" />
+      <el-table-column prop="investAmount" label="投资金额" />
+      <el-table-column label="年化利率">
+        <template slot-scope="scope">
+          {{ scope.row.lendYearRate * 100 }}%
+        </template>
+      </el-table-column>
+      <el-table-column prop="investTime" label="投资时间" />
+      <el-table-column prop="lendStartDate" label="开始日期" />
+      <el-table-column prop="lendEndDate" label="结束日期" />
+      <el-table-column prop="expectAmount" label="预期收益" />
+      <el-table-column prop="investTime" label="投资时间" />
+    </el-table>
+
     <el-row style="text-align:center;margin-top: 40px;">
       <el-button @click="back">
         返回
@@ -141,6 +159,7 @@
 </template>
 <script>
 import lendApi from '@/api/core/lend'
+import lendItemApi from '@/api/core/lend-item'
 import '@/styles/show.css'
 
 export default {
@@ -151,13 +170,16 @@ export default {
           param: {}
         },
         borrower: {}
-      }
+      },
+      lendItemList: [] //列表
     }
   },
 
   created() {
     if (this.$route.params.id) {
       this.fetchDataById()
+      // 投资记录
+      this.fetchLendItemList()
     }
   },
 
@@ -167,9 +189,13 @@ export default {
         this.lendDetail = response.data.lendDetail
       })
     },
-
     back() {
       this.$router.push({ path: '/core/lend/list' })
+    },
+    fetchLendItemList() {
+      lendItemApi.getList(this.$route.params.id).then(response => {
+        this.lendItemList = response.data.list
+      })
     }
   }
 }
